@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/ArchivoBlack.ttf",
+      "sha1": "5b6c44432da2e1330ad30153eddf98c739013b88"
+    },
+    {
+      "path": "assets/fonts/Archivo_Black/ArchivoBlack-Regular.ttf",
+      "sha1": "5b6c44432da2e1330ad30153eddf98c739013b88"
+    },
+    {
+      "path": "assets/fonts/Archivo_Black/OFL.txt",
+      "sha1": "5c835f30129f22248b3d098214c8a4ec230ff94b"
+    }
+  ]
+}
