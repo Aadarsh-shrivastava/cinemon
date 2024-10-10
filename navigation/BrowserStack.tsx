@@ -6,11 +6,13 @@ import Icon from '../Icon';
 import {theme} from '../theme';
 import BrowserScreen from '../screens/BrowserScreen/BrowserScreen';
 import MovieStackNavigator from './MovieStackNavigator';
+import SearchScreen from '../screens/BrowserScreen/SearchScreen';
 
 export type BrowserStackParamList = {
   BrowserScren: undefined;
-  MovieStack: undefined;
   FilterScreen: undefined;
+  MovieStack: {tmdbId: number};
+  SearchScreen: undefined;
 };
 
 const BrowserStack = createStackNavigator<BrowserStackParamList>();
@@ -20,7 +22,7 @@ const BrowserStackNavigator = () => {
     <BrowserStack.Navigator>
       <BrowserStack.Screen
         options={{headerShown: false}}
-        name="BrowserScren"
+        name="BrowserScreen"
         component={BrowserScreen}
       />
       <BrowserStack.Screen
@@ -32,6 +34,11 @@ const BrowserStackNavigator = () => {
         options={{headerShown: false}}
         name="MovieStack"
         component={MovieStackNavigator}
+      />
+      <BrowserStack.Screen
+        options={{headerShown: false, animationEnabled: false}}
+        name="SearchScreen"
+        component={SearchScreen}
       />
     </BrowserStack.Navigator>
   );

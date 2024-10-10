@@ -1,9 +1,11 @@
 import {
+  ActivityIndicator,
   FlatList,
   ScrollView,
   SectionList,
   StatusBar,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -21,27 +23,69 @@ import {StackScreenProps} from '@react-navigation/stack';
 import {MovieStackParamList} from 'navigation/MovieStackNavigator';
 import Carousal from 'components/Carousal';
 import useButtonBar, {button} from '../../hooks/useButtonBar';
+import useApi from '../../hooks/useApi';
+import {Section, movie_detail, thumbnail} from 'types';
+import Logger from 'components/Logger';
+import {useDispatch} from 'react-redux';
+import {addToWatchList} from 'redux/watchlistAction';
 
 type MovieScreenProps = StackScreenProps<MovieStackParamList, 'MovieScreen'>;
-const MovieScreen = ({navigation}: MovieScreenProps) => {
+const MovieScreen = ({navigation, route}: MovieScreenProps) => {
   const {theme, toggleTheme} = useTheme();
+  const {tmdbId} = route.params;
+  const dispatch = useDispatch();
+
+  const {
+    data: movie,
+    isLoading,
+    error,
+  }: {data: movie_detail; isLoading: boolean; error: any} = useApi(
+    `/3/movie/${tmdbId}?language=en-US`,
+    'GET',
+    'movei_details',
+  );
+
+  const handleAddToWatchList = () => {
+    dispatch(addToWatchList(movie));
+  };
+  const {
+    data: reviews,
+    isLoading: isReviewLoading,
+    error: errorInReviewFetching,
+  }: {data: any; isLoading: boolean; error: any} = useApi(
+    `/3/movie/${tmdbId}/reviews`,
+    'GET',
+    'movie_reviews',
+  );
+
+  const {
+    data: movie_images,
+    isLoading: isImagesLoading,
+    error: errorInImagesFetching,
+  } = useApi(`/3/movie/${tmdbId}/images`, 'GET', 'movie_images' + tmdbId);
+
+  const {data: recommendedMovies, isLoading: isRecommendationLoading} = useApi(
+    `/3/movie/${tmdbId}/recommendations`,
+    'GET',
+    'recommendations' + tmdbId,
+  );
 
   const firstButtons: button[] = [
     {
       label: 'Rating',
-      onPress: () => navigation.push('RatingScreen'),
+      onPress: () => navigation.push('RatingScreen', {tmdbId: tmdbId}),
     },
     {
       label: 'Guide',
-      onPress: () => navigation.push('GuideScreen'),
+      onPress: () => navigation.push('GuideScreen', {tmdbId}),
     },
     {
       label: 'Awards',
-      onPress: () => navigation.push('AwardScreen'),
+      onPress: () => navigation.push('AwardScreen', {tmdbId}),
     },
     {
       label: 'Cast',
-      onPress: () => navigation.push('CastScreen'),
+      onPress: () => navigation.push('CastScreen', {tmdbId}),
     },
   ];
 
@@ -49,10 +93,10 @@ const MovieScreen = ({navigation}: MovieScreenProps) => {
     {
       label: 'Wishlist',
       leftIcon: <Icon name="add" type="MaterialIcons" size={20} />,
+      onPress: handleAddToWatchList,
     },
     {
       label: 'Set Reminder',
-
       leftIcon: <Icon name="alarm" type="MaterialIcons" size={20} />,
     },
   ];
@@ -74,55 +118,68 @@ const MovieScreen = ({navigation}: MovieScreenProps) => {
     containerStyle: {margin: 5},
   });
 
-  const section = [
+  const section: Section[] = [
     {
       title: '',
-      data: [[1, 2, 3, 4, 5]],
+      data: [
+        movie_images ? (movie_images.backdrops.slice(0, 6) as thumbnail[]) : [],
+      ],
       component: ThumbNail,
     },
     {
       title: 'Ratings & Reviews',
-      data: [[4, 5, 6, 7, 8]],
+      data: [reviews ? reviews.results.slice(0, 10) : []],
       component: RatingCard,
     },
     {
       title: 'You might also like',
-      data: [[4, 5, 6, 7]],
+      data: [recommendedMovies ? recommendedMovies.results.slice(0, 5) : []],
       component: VerticalMovieCard,
-      onPress: () => navigation.push('MovieScreen'),
+      onPress: (id: number) => navigation.push('MovieScreen', {tmdbId: id}),
     },
   ];
+
   return (
     <View style={styles(theme).container}>
       <StatusBar barStyle={'light-content'} />
+      {isLoading || isReviewLoading || isImagesLoading ? (
+        <ActivityIndicator />
+      ) : (
+        <SectionList
+          sections={section}
+          renderSectionHeader={({section}) =>
+            section.title ? (
+              <SectionHeader
+                sectionTitle={section.title}
+                actionTitle={''}
+                onPress={() => {}}
+              />
+            ) : null
+          }
+          ListHeaderComponent={() => (
+            <View>
+              <Banner
+                height={13}
+                PosterUrl={movie.poster_path}
+                title={movie.title}
+                overView={movie.overview}
+              />
 
-      <SectionList
-        sections={section}
-        renderSectionHeader={({section}) =>
-          section.title ? (
-            <SectionHeader
-              sectionTitle={section.title}
-              actionTitle={''}
-              onPress={() => {}}
+              <FirstButtonBar />
+              <SecondButtonBar />
+            </View>
+          )}
+          renderItem={({item, section}) => (
+            <Carousal
+              // onPress={section.onPress ? section.onPress : () => {}}
+              data={item}
+              renderChild={dataitem => (
+                <section.component item={dataitem} onPress={section.onPress} />
+              )}
             />
-          ) : null
-        }
-        ListHeaderComponent={() => (
-          <View>
-            <Banner height={13} />
-
-            <FirstButtonBar />
-            <SecondButtonBar />
-          </View>
-        )}
-        renderItem={({item, section}) => (
-          <Carousal
-            onPress={section.onPress ? section.onPress : () => {}}
-            data={item}
-            renderChild={dataitem => <section.component />}
-          />
-        )}
-      />
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -191,3 +248,8 @@ const Buttons = ({theme, navigation, width, width2}: any) => {
     </>
   );
 };
+
+// const MovieScreen = () => {
+//   return <></>;
+// };
+// export default MovieScreen;

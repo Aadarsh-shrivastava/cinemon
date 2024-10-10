@@ -10,6 +10,7 @@ import MovieScreen from '../screens/MovieScreen/MovieScreen';
 import MovieStackNavigator, {MovieStackParamList} from './MovieStackNavigator';
 import BrowserStackNavigator from './BrowserStack';
 import HomeStackNavigator from './HomeStack';
+import {KeyboardAvoidingView} from 'react-native';
 
 export type BottomTabParamList = {
   HomeStack: undefined;
@@ -26,6 +27,7 @@ const BottomTabNavigator = () => {
     <BottomTab.Navigator
       screenOptions={{
         // headerShown: false,
+        tabBarHideOnKeyboard: true,
         header: () => <Header />,
         tabBarStyle: {
           height: theme.size.xl * 2,
@@ -85,6 +87,7 @@ const BottomTabNavigator = () => {
       <BottomTab.Screen
         name="ProfileStack"
         options={{
+          headerShown: false,
           title: 'Profile',
           tabBarIcon: () => (
             <Icon
@@ -96,11 +99,6 @@ const BottomTabNavigator = () => {
         }}
         component={ProfileScreen}
       />
-      {/* <BottomTab.Screen
-        name="MovieStack"
-        options={{headerShown: false, tabBarButton: () => null}}
-        component={MovieStackNavigator}
-      /> */}
     </BottomTab.Navigator>
   );
 };

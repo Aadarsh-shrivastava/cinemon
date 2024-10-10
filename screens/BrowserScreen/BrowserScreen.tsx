@@ -1,5 +1,12 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {Suspense} from 'react';
 import {Theme, useTheme} from '../../contexts/themeContext';
 import SearchBar from './components/SearchBar';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -8,33 +15,67 @@ import {chip} from 'types';
 import VerticalMovieCard from 'components/VerticalMovieCard';
 import {StackScreenProps} from '@react-navigation/stack';
 import {BrowserStackParamList} from 'navigation/BrowserStack';
+import useApi from '../../hooks/useApi';
+import Logger from 'components/Logger';
+import useInfiniteApi from '../../hooks/useInfiniteApi';
+import FilterBar from 'components/FilterBar';
 
 type BrowserScreenProps = StackScreenProps<BrowserStackParamList, 'MovieStack'>;
 const TaskScreen = ({navigation}: BrowserScreenProps) => {
   const {theme, toggleTheme} = useTheme();
-  const filterData: chip[] = [
-    {label: 'All Shows', isSelected: false},
-    {label: 'Movies', isSelected: false},
-    {label: 'TV Shows', isSelected: false},
-    {label: 'Streaming', isSelected: false},
-  ];
 
-  const {FilterBar, chipData} = useFilter(filterData);
+  const {
+    data: filters,
+    isLoading: isLoadingFilters,
+  }: {data: {genres: chip[]}; isLoading: boolean} = useApi(
+    '/3/genre/movie/list',
+    'GET',
+    'filters',
+  );
+
+  const {FilterBar: FilterBarComponent, chipData} = useFilter(
+    filters ? filters.genres : [],
+  );
+
+  const {data, fetchNextPage} = useInfiniteApi(
+    '/3/discover/movie' +
+      (chipData && chipData.length > 0 && chipData.some(item => item.isSelected)
+        ? '?with_genres=28,' +
+          chipData
+            .filter(item => item.isSelected) // Only keep selected items
+            .map(item => item.id) // Extract the IDs
+            .join(',') // Join IDs with commas
+        : ''),
+    'GET',
+    'popular_movies',
+  );
+
   return (
     <SafeAreaView style={styles(theme).container}>
-      <SearchBar />
-      <FilterBar />
+      <Pressable onPress={() => navigation.push('SearchScreen')}>
+        <SearchBar isReadOnly />
+      </Pressable>
+      {!isLoadingFilters && <FilterBarComponent />}
+      {/* <Logger item={chipData} /> */}
       <FlatList
         numColumns={2}
-        data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
+        data={data ? data.pages.flatMap(page => page.results) : []}
         renderItem={({item, index}) => (
-          <TouchableOpacity
-            onPress={() => navigation.push('MovieStack')}
-            style={{marginHorizontal: theme.spacing.s}}>
-            <VerticalMovieCard width={12} height={16} />
-          </TouchableOpacity>
+          <View style={{gap: theme.spacing.s}}>
+            <VerticalMovieCard
+              width={12}
+              height={16}
+              item={item}
+              onPress={(id: number) =>
+                navigation.push('MovieStack', {tmdbId: id})
+              }
+            />
+          </View>
         )}
-        keyExtractor={item => item.toString()}
+        keyExtractor={(item, index) => item.id.toString() + index.toString()}
+        columnWrapperStyle={{gap: theme.spacing.s}}
+        onEndReached={() => fetchNextPage()}
+        onEndReachedThreshold={2}
         contentContainerStyle={{
           gap: theme.spacing.s,
           margin: 'auto',

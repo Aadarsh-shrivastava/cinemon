@@ -10,21 +10,23 @@ import RatingScreen from '../screens/RatingScreen/RatingScreen';
 import GuideScreen from '../screens/GuideScreen/GuideScreen';
 
 export type MovieStackParamList = {
-  MovieScreen: undefined;
-  RatingScreen: undefined;
-  GuideScreen: undefined;
-  CastScreen: undefined;
-  AwardScreen: undefined;
+  MovieScreen: {tmdbId: number};
+  RatingScreen: {tmdbId: number};
+  GuideScreen: {tmdbId: number};
+  CastScreen: {tmdbId: number};
+  AwardScreen: {tmdbId: number};
 };
 
 const MovieStack = createStackNavigator<MovieStackParamList>();
 
-const MovieStackNavigator = () => {
+const MovieStackNavigator = ({route}: {route: any}) => {
+  const {tmdbId} = route.params;
   return (
     <MovieStack.Navigator>
       <MovieStack.Screen
         options={{headerShown: false}}
         name="MovieScreen"
+        initialParams={{tmdbId}}
         component={MovieScreen}
       />
       <MovieStack.Screen
@@ -35,6 +37,7 @@ const MovieStackNavigator = () => {
         }}
         name="RatingScreen"
         component={RatingScreen}
+        initialParams={{tmdbId}}
       />
       <MovieStack.Screen
         options={{
@@ -43,6 +46,7 @@ const MovieStackNavigator = () => {
         }}
         name="AwardScreen"
         component={AwardScreen}
+        initialParams={{tmdbId}}
       />
       <MovieStack.Screen
         options={{
@@ -51,6 +55,7 @@ const MovieStackNavigator = () => {
         }}
         name="CastScreen"
         component={CastScreen}
+        initialParams={{tmdbId}}
       />
       <MovieStack.Screen
         options={{
@@ -59,6 +64,7 @@ const MovieStackNavigator = () => {
         }}
         name="GuideScreen"
         component={GuideScreen}
+        initialParams={{tmdbId}}
       />
     </MovieStack.Navigator>
   );

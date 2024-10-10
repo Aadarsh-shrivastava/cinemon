@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "239073733004",
+    "project_id": "cinemon-7fa5d",
+    "storage_bucket": "cinemon-7fa5d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239073733004:android:f6be70040d88cfbe7c8ea9",
+        "android_client_info": {
+          "package_name": "com.cinemon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBz-ZU37ttP79iaH0OwQYZF7I-EoGOA3Rk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

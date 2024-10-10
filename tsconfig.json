@@ -6,7 +6,8 @@
       "@components/*": ["components/"],
       "@contexts/*": ["contexts/"],
       "@constants/*": ["constants/"],
-      "@Icon/*": ["Icon/"]
+      "@Icon/*": ["Icon/"],
+      "@hooks/*": ["hooks/"]
     }
   }
 }

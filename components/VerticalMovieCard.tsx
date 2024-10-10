@@ -1,4 +1,5 @@
 import {
+  Image,
   ImageBackground,
   StyleSheet,
   Text,
@@ -11,26 +12,40 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {BottomTabParamList} from 'navigation/BottomNavigation';
 import {useNavigation} from '@react-navigation/native';
 import {MovieStackParamList} from 'navigation/MovieStackNavigator';
+import {movieItem, movie_detail} from 'types';
+import Logger from './Logger';
+import {useDispatch} from 'react-redux';
+import {addToWatchList} from 'redux/watchlistAction';
 
 type VerticalMovieCardNavigarionProp = StackNavigationProp<MovieStackParamList>;
 interface VerticalMovieCardProps {
   height?: number;
   width?: number;
+  item?: movieItem | movie_detail;
+  onPress?: any;
 }
-const VerticalMovieCard = ({height, width}: VerticalMovieCardProps) => {
+const VerticalMovieCard = ({
+  height,
+  width,
+  item,
+  onPress,
+}: VerticalMovieCardProps) => {
   const {theme, toggleTheme} = useTheme();
   const navigation = useNavigation<VerticalMovieCardNavigarionProp>();
+
   return (
     <View style={styles(theme).container}>
-      <ImageBackground
-        source={{
-          uri: 'https://i.etsystatic.com/37166133/r/il/60f034/4087791906/il_570xN.4087791906_jcbj.jpg',
-        }}
-        style={styles(theme, width, height).BackgroundImage}
-        imageStyle={styles(theme).image}
-        resizeMode="cover"
-      />
-      <Text style={styles(theme).title}>Movie</Text>
+      <TouchableOpacity onPress={() => onPress && onPress(item?.id)}>
+        <ImageBackground
+          source={{
+            uri: `http://image.tmdb.org/t/p/w200/` + item?.poster_path,
+          }}
+          style={styles(theme, width, height).BackgroundImage}
+          imageStyle={styles(theme).image}
+          resizeMode="cover"
+        />
+        <Text style={styles(theme).title}>{item?.title ?? '--??--'}</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -48,5 +63,6 @@ const styles = (theme: Theme, width: number = 9, height: number = 12) =>
     title: {
       color: theme.colors.foreground,
       margin: theme.spacing.sm,
+      width: theme.size.m * width,
     },
   });

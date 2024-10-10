@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   ListRenderItem,
   StyleSheet,
@@ -8,14 +9,13 @@ import {
 } from 'react-native';
 import React from 'react';
 import {Theme, useTheme} from 'contexts/themeContext';
-import VerticalMovieCard from './VerticalMovieCard';
 
 interface CarousalProps<T> {
   renderChild: (item: T) => JSX.Element;
   data: T[];
-  onPress?: () => void;
+  onEndReached?: () => {};
 }
-const Carousal = <T,>({renderChild, data, onPress}: CarousalProps<T>) => {
+const Carousal = <T,>({renderChild, data, onEndReached}: CarousalProps<T>) => {
   const {theme, toggleTheme} = useTheme();
   return (
     <View style={styles(theme).container}>
@@ -25,12 +25,18 @@ const Carousal = <T,>({renderChild, data, onPress}: CarousalProps<T>) => {
           horizontal
           showsHorizontalScrollIndicator={false}
           data={data}
-          renderItem={({item}) => (
-            <TouchableOpacity onPress={onPress}>
-              {renderChild(item)}
-            </TouchableOpacity>
+          renderItem={({item}) => <>{renderChild(item)}</>}
+          keyExtractor={(item, index) => index.toString()}
+          onEndReached={onEndReached}
+          ListFooterComponent={() => (
+            <View style={{flex: 1, height: 50}}>
+              <ActivityIndicator
+                color={theme.colors.primary}
+                style={{marginVertical: 60}}
+                size={40}
+              />
+            </View>
           )}
-          keyExtractor={index => Math.random().toString() + index}
         />
       </View>
     </View>

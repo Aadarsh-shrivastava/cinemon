@@ -9,7 +9,7 @@ import HomeScreen from '../screens/HomeScreen/HomeScreen';
 
 export type HomeStackParamList = {
   HomeScreen: undefined;
-  MovieStack: undefined;
+  MovieStack: {tmdbId: number};
   FilterScreen: undefined;
 };
 
@@ -17,20 +17,22 @@ const HomeStack = createStackNavigator<HomeStackParamList>();
 
 const HomeStackNavigator = () => {
   return (
-    <HomeStack.Navigator>
-      <HomeStack.Screen
-        options={{
-          header: () => <Header />,
-        }}
-        name="HomeScreen"
-        component={HomeScreen}
-      />
-      <HomeStack.Screen
-        options={{headerShown: false}}
-        name="MovieStack"
-        component={MovieStackNavigator}
-      />
-    </HomeStack.Navigator>
+    <>
+      <HomeStack.Navigator>
+        <HomeStack.Screen
+          options={{
+            header: () => <Header />,
+          }}
+          name="HomeScreen"
+          component={HomeScreen}
+        />
+        <HomeStack.Screen
+          options={{headerShown: false}}
+          name="MovieStack"
+          component={MovieStackNavigator}
+        />
+      </HomeStack.Navigator>
+    </>
   );
 };
 

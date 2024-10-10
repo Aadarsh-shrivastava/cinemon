@@ -20,6 +20,10 @@
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
+
+             <!-- This handles http or https links -->
+        <data android:scheme="http" />
+        <data android:scheme="https" />
         </intent-filter>
       </activity>
     </application>

@@ -1,53 +1,52 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useState, useEffect} from 'react';
 import {Theme, useTheme} from 'contexts/themeContext';
 import {chip} from 'types';
 import Chip from 'components/Chip';
 
-const useFilter = (data: chip[]) => {
-  const {theme, toggleTheme} = useTheme();
-  const [chipData, setChipData] = useState<chip[]>(data);
+const useFilter = (data: chip[] = []) => {
+  const {theme} = useTheme();
 
-  const FilterBar = () => {
-    // const debounce = (func: Function, delay: number) => {
-    //   let timeoutId: NodeJS.Timeout;
-    //   return (...args: any[]) => {
-    //     clearTimeout(timeoutId);
-    //     timeoutId = setTimeout(() => func(...args), delay);
-    //   };
-    // };
+  // Initialize chipData with default empty array
+  const [chipData, setChipData] = useState<chip[]>([]);
 
-    const toggleFilter = (index: number) => {
-      setChipData(chipData => {
-        return chipData.map((item, ind) =>
-          ind == index ? {...item, isSelected: !item.isSelected} : item,
-        );
-      });
-    };
+  // Update chipData when data changes
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setChipData(data);
+    }
+  }, [data]);
 
-    return (
-      <View style={styles(theme).container}>
-        <FlatList
-          data={chipData}
-          horizontal
-          contentContainerStyle={{gap: theme.spacing.s}}
-          renderItem={({item, index}) => (
-            <TouchableOpacity
-              key={item.label}
-              onPress={() => {
-                toggleFilter(index);
-              }}>
-              <Chip
-                key={item.label}
-                label={item.label}
-                isSelected={item.isSelected}
-              />
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+  const toggleFilter = (index: number) => {
+    setChipData(prevChipData =>
+      prevChipData.map((item, ind) =>
+        ind === index ? {...item, isSelected: !item.isSelected} : item,
+      ),
     );
   };
+
+  const FilterBar = () => (
+    <View style={styles(theme).container}>
+      <FlatList
+        showsHorizontalScrollIndicator={false}
+        data={chipData}
+        horizontal
+        contentContainerStyle={{gap: theme.spacing.s}}
+        renderItem={({item, index}) => (
+          <TouchableOpacity
+            key={item.name + item.id}
+            onPress={() => toggleFilter(index)}>
+            <Chip
+              key={item.name}
+              label={item.name}
+              isSelected={item.isSelected ?? false}
+            />
+          </TouchableOpacity>
+        )}
+      />
+    </View>
+  );
+
   return {FilterBar, chipData};
 };
 
@@ -58,7 +57,6 @@ const styles = (theme: Theme) =>
     container: {
       alignSelf: 'center',
       flexDirection: 'row',
-      // flexWrap: 'wrap',
       justifyContent: 'flex-start',
       gap: theme.spacing.s,
       padding: theme.spacing.s,
