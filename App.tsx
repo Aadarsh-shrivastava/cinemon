@@ -1,3 +1,5 @@
+import 'react-native-reanimated';
+import 'react-native-gesture-handler';
 import React, {useContext, useEffect, useState} from 'react';
 import {
   Linking,

@@ -14,8 +14,14 @@ interface CarousalProps<T> {
   renderChild: (item: T) => JSX.Element;
   data: T[];
   onEndReached?: () => {};
+  isLoading?: boolean;
 }
-const Carousal = <T,>({renderChild, data, onEndReached}: CarousalProps<T>) => {
+const Carousal = <T,>({
+  renderChild,
+  data,
+  onEndReached,
+  isLoading,
+}: CarousalProps<T>) => {
   const {theme, toggleTheme} = useTheme();
   return (
     <View style={styles(theme).container}>
@@ -30,11 +36,13 @@ const Carousal = <T,>({renderChild, data, onEndReached}: CarousalProps<T>) => {
           onEndReached={onEndReached}
           ListFooterComponent={() => (
             <View style={{flex: 1, height: 50}}>
-              <ActivityIndicator
-                color={theme.colors.primary}
-                style={{marginVertical: 60}}
-                size={40}
-              />
+              {isLoading && (
+                <ActivityIndicator
+                  color={theme.colors.primary}
+                  style={{marginVertical: 60}}
+                  size={40}
+                />
+              )}
             </View>
           )}
         />

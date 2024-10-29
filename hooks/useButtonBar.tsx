@@ -82,8 +82,9 @@ const styles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'center',
       alignItems: 'center',
+      gap: 4,
     },
     button: {
       padding: 10,
@@ -108,8 +109,6 @@ const styles = (theme: Theme) =>
       marginRight: 20,
     },
     iconPlaceholder: {
-      // width: 24, // Same width as icon, for consistency
-      // height: 24,
       marginRight: 20,
       opacity: 0, // Invisible but takes up space
     },

@@ -13,7 +13,7 @@ const useInfiniteApi = (uri: string, method: string, key: string) => {
           'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2YmVjNmRjMmQ4OWZkYTU2ZGVmMmFlNWIyOGVhZDExOCIsIm5iZiI6MTcyNjQ4MDAzMy40ODMyNywic3ViIjoiNjZlN2UxOTZkZDIyNGQxYTM5OTFiZmMxIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.F6qA5615t5mhz8-2IWZx7qH7ZBKW51ATC8ZpAZCYTd8',
       },
     };
-    console.log('getching', uri);
+    console.log('getching', url);
 
     const res = await fetch(url, options);
     if (!res.ok) {

@@ -21,7 +21,11 @@ import {movieItem} from 'types';
 import SlidableBanner from 'components/SlidableBanner';
 import useApi from '../../hooks/useApi';
 import useInfiniteApi from 'hooks/useInfiniteApi';
+import {Skeleton} from 'moti/skeleton';
 import VerticalMovieCardLoader from 'components/Loaders/VerticalMovieCardLoader';
+import CustomBanner from 'components/BannerCustom';
+import VideoPlayer from 'components/VideoPlayer';
+import MoviePlayer from 'components/MoviePlayer';
 
 type HomeScreenNavigationProps = StackNavigationProp<
   HomeStackParamList,
@@ -65,7 +69,7 @@ const HomeScreen = () => {
     {
       title: 'Upcoming movie',
       fetchNext: fetchNextUpcoming,
-      isloading: isLoadingUpcoming,
+      isloading: true,
       data: [
         upcomingMovies
           ? upcomingMovies.pages.flatMap(page => page.results)
@@ -76,7 +80,7 @@ const HomeScreen = () => {
     {
       title: 'Now Playing',
       fetchNext: fetchNextNowPlaying,
-      isLoading: true,
+      isLoading: isLoadingNowPlaying,
       data: [nowPlaying ? nowPlaying.pages.flatMap(page => page.results) : []],
       placeholder: () => <Text>{isLoadingNowPlaying.toString()}</Text>,
     },
@@ -89,11 +93,11 @@ const HomeScreen = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-
       <SectionList
         ListHeaderComponent={() => (
           <View>
             <SlidableBanner />
+            {/* <MoviePlayer /> */}
           </View>
         )}
         sections={sections}
@@ -101,17 +105,18 @@ const HomeScreen = () => {
           <Carousal
             onEndReached={section.fetchNext}
             data={item}
-            renderChild={
-              section.isloading
-                ? () => <section.placeholder />
-                : (dataitem: movieItem) => (
-                    <VerticalMovieCard
-                      item={dataitem}
-                      onPress={(id: number) =>
-                        navigation.push('MovieStack', {tmdbId: id})
-                      }
-                    />
-                  )
+            isLoading={section.isLoading}
+            renderChild={(dataitem: movieItem) =>
+              section.isLoading ? (
+                <VerticalMovieCardLoader />
+              ) : (
+                <VerticalMovieCard
+                  item={dataitem}
+                  onPress={(id: number) =>
+                    navigation.push('MovieStack', {tmdbId: id})
+                  }
+                />
+              )
             }
           />
         )}
@@ -119,7 +124,7 @@ const HomeScreen = () => {
         renderSectionHeader={({section}) => (
           <SectionHeader
             sectionTitle={section.title}
-            actionTitle={'See More'}
+            // actionTitle={'See More'}
             onPress={() => {}}
           />
         )}

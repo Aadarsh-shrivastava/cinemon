@@ -11,6 +11,9 @@ import MovieStackNavigator, {MovieStackParamList} from './MovieStackNavigator';
 import BrowserStackNavigator from './BrowserStack';
 import HomeStackNavigator from './HomeStack';
 import {KeyboardAvoidingView} from 'react-native';
+import useAuth from 'contexts/authContext';
+import ProfileStackNavigator from './ProfileStack';
+import AuthStackNavigator from './AuthStack';
 
 export type BottomTabParamList = {
   HomeStack: undefined;
@@ -23,6 +26,7 @@ const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
   const {theme, toggleTheme} = useTheme();
+  const {user} = useAuth();
   return (
     <BottomTab.Navigator
       screenOptions={{
@@ -34,9 +38,9 @@ const BottomTabNavigator = () => {
           backgroundColor: theme.colors.black,
           padding: theme.spacing.m,
         },
-        tabBarLabelStyle: {color: theme.colors.background},
-        tabBarActiveTintColor: 'red',
-        tabBarInactiveTintColor: 'gray',
+        tabBarLabelStyle: {color: theme.colors.primary},
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.foreground,
       }}>
       <BottomTab.Screen
         options={{
@@ -69,7 +73,7 @@ const BottomTabNavigator = () => {
         }}
         component={BrowserStackNavigator}
       />
-
+      {/* 
       <BottomTab.Screen
         name="DiscoverStack"
         options={{
@@ -83,7 +87,7 @@ const BottomTabNavigator = () => {
           ),
         }}
         component={DiscoverScreen}
-      />
+      /> */}
       <BottomTab.Screen
         name="ProfileStack"
         options={{
@@ -97,7 +101,7 @@ const BottomTabNavigator = () => {
             />
           ),
         }}
-        component={ProfileScreen}
+        component={user ? ProfileStackNavigator : AuthStackNavigator}
       />
     </BottomTab.Navigator>
   );

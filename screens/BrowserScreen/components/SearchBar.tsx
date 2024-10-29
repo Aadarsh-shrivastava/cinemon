@@ -1,4 +1,4 @@
-import {StyleSheet, TextInput, View} from 'react-native';
+import {StyleSheet, TextInput, View, useWindowDimensions} from 'react-native';
 import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
 import {Theme, useTheme} from 'contexts/themeContext';
 import Icon from '../../../Icon';
@@ -19,12 +19,14 @@ const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
     const [query, setQuery] = useState();
     const searchBarRef = useRef<TextInput>(null);
 
+    const {width, height} = useWindowDimensions();
+
     useImperativeHandle(ref, () => ({
       focus: () => searchBarRef.current?.focus(),
     }));
 
     return (
-      <View style={styles(theme).container}>
+      <View style={[styles(theme).container, {}]}>
         <Icon
           style={styles(theme).leftIcon}
           name="search"
@@ -33,7 +35,13 @@ const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
         <TextInput
           ref={searchBarRef}
           placeholder="SEARCH"
-          style={{flex: 1}}
+          autoFocus={true}
+          placeholderTextColor={theme.colors.foreground}
+          style={{
+            flex: 1,
+            color: theme.colors.foreground,
+            width: width * 10,
+          }}
           editable={!isReadOnly}
           value={value} // Use the parent's query as the value
           onChangeText={onTextChange} // Update the parent's state on text change
@@ -54,6 +62,7 @@ const styles = (theme: Theme) =>
       margin: theme.spacing.m,
       borderRadius: theme.spacing.sm,
       flexDirection: 'row',
+      justifyContent: 'flex-end',
       alignItems: 'center',
     },
     leftIcon: {

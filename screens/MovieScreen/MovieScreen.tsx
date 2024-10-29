@@ -1,17 +1,13 @@
 import {
   ActivityIndicator,
-  FlatList,
-  ScrollView,
   SectionList,
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {Theme, useTheme} from 'contexts/themeContext';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import Banner from 'components/Banner';
 import Button from 'components/Button';
 import ThumbNail from 'components/ThumbNail';
@@ -25,16 +21,35 @@ import Carousal from 'components/Carousal';
 import useButtonBar, {button} from '../../hooks/useButtonBar';
 import useApi from '../../hooks/useApi';
 import {Section, movie_detail, thumbnail} from 'types';
-import Logger from 'components/Logger';
 import {useDispatch} from 'react-redux';
-import {addToWatchList} from 'redux/watchlistAction';
+import {addToWatchList, removeFromWatchList} from 'redux/watchlistAction';
+import useAuth from 'contexts/authContext';
+import {
+  getWatchList,
+  isWatchListed,
+  addMovieToWatchlist,
+  removeMovieFromWatchlist,
+} from '../../firebase/firestore/watchList';
+import CustomBanner from 'components/BannerCustom';
+import CustomLoader from 'components/Loaders/CustomLoader';
+import {FAB, PaperProvider} from 'react-native-paper';
 
 type MovieScreenProps = StackScreenProps<MovieStackParamList, 'MovieScreen'>;
 const MovieScreen = ({navigation, route}: MovieScreenProps) => {
   const {theme, toggleTheme} = useTheme();
   const {tmdbId} = route.params;
   const dispatch = useDispatch();
+  const {user} = useAuth();
+  const [isWatchListedState, setIsWatchListedState] = useState<boolean>(false);
 
+  isWatchListed(user?.uid, tmdbId.toString())
+    .then(b => {
+      setIsWatchListedState(b);
+      console.log(b);
+    })
+    .catch(e =>
+      console.log(`something wnet wrong with watchlist checking function`),
+    );
   const {
     data: movie,
     isLoading,
@@ -46,7 +61,14 @@ const MovieScreen = ({navigation, route}: MovieScreenProps) => {
   );
 
   const handleAddToWatchList = () => {
-    dispatch(addToWatchList(movie));
+    // dispatch(addToWatchList(movie));
+    isWatchListedState
+      ? removeMovieFromWatchlist(user?.uid ?? '', movie.id.toString()).then(d =>
+          setIsWatchListedState(false),
+        )
+      : addMovieToWatchlist(user?.uid ?? '', movie).then(d =>
+          setIsWatchListedState(true),
+        );
   };
   const {
     data: reviews,
@@ -76,13 +98,10 @@ const MovieScreen = ({navigation, route}: MovieScreenProps) => {
       onPress: () => navigation.push('RatingScreen', {tmdbId: tmdbId}),
     },
     {
-      label: 'Guide',
-      onPress: () => navigation.push('GuideScreen', {tmdbId}),
+      label: 'Video',
+      onPress: () => navigation.push('VideoScreen', {tmdbId}),
     },
-    {
-      label: 'Awards',
-      onPress: () => navigation.push('AwardScreen', {tmdbId}),
-    },
+
     {
       label: 'Cast',
       onPress: () => navigation.push('CastScreen', {tmdbId}),
@@ -91,7 +110,7 @@ const MovieScreen = ({navigation, route}: MovieScreenProps) => {
 
   const secondButtons: button[] = [
     {
-      label: 'Wishlist',
+      label: isWatchListedState ? 'Remove' : 'Watchhlist',
       leftIcon: <Icon name="add" type="MaterialIcons" size={20} />,
       onPress: handleAddToWatchList,
     },
@@ -118,22 +137,28 @@ const MovieScreen = ({navigation, route}: MovieScreenProps) => {
     containerStyle: {margin: 5},
   });
 
-  const section: Section[] = [
+  const section: any[] = [
     {
       title: '',
       data: [
         movie_images ? (movie_images.backdrops.slice(0, 6) as thumbnail[]) : [],
       ],
+      isLoading: isReviewLoading,
+      loader: <CustomLoader height={6} width={10} radius={0} />,
       component: ThumbNail,
     },
     {
       title: 'Ratings & Reviews',
       data: [reviews ? reviews.results.slice(0, 10) : []],
+      isLoading: isImagesLoading,
+      loader: <CustomLoader height={6} width={10} radius={0} />,
       component: RatingCard,
     },
     {
       title: 'You might also like',
       data: [recommendedMovies ? recommendedMovies.results.slice(0, 5) : []],
+      isLoading: isRecommendationLoading,
+      loader: <CustomLoader height={6} width={10} radius={0} />,
       component: VerticalMovieCard,
       onPress: (id: number) => navigation.push('MovieScreen', {tmdbId: id}),
     },
@@ -142,6 +167,30 @@ const MovieScreen = ({navigation, route}: MovieScreenProps) => {
   return (
     <View style={styles(theme).container}>
       <StatusBar barStyle={'light-content'} />
+      <View
+        style={{
+          alignItems: 'center',
+          position: 'absolute',
+          bottom: 10,
+          borderRadius: 50,
+          right: 10,
+          zIndex: 10,
+        }}>
+        <Icon
+          style={{
+            elevation: 7,
+            width: 60,
+            borderRadius: 50,
+            borderColor: 'black',
+          }}
+          name="arrow-right-drop-circle"
+          type="MaterialCommunityIcons"
+          size={60} // Set a suitable size for the icon
+          color={theme.colors.primary} // Icon color
+          onPress={() => navigation.push('StreamScreen', {tmdbId: tmdbId})}
+        />
+        <Text style={{color: theme.colors.primary}}>Watch Now</Text>
+      </View>
       {isLoading || isReviewLoading || isImagesLoading ? (
         <ActivityIndicator />
       ) : (
@@ -158,24 +207,34 @@ const MovieScreen = ({navigation, route}: MovieScreenProps) => {
           }
           ListHeaderComponent={() => (
             <View>
-              <Banner
-                height={13}
-                PosterUrl={movie.poster_path}
-                title={movie.title}
-                overView={movie.overview}
-              />
+              <CustomBanner
+                Movie={movie}
+                height={10}
+                PosterUrl={movie.poster_path}>
+                <CustomBanner.Title
+                  title={movie.title ?? ''}></CustomBanner.Title>
+                <CustomBanner.Description
+                  description={movie.overview}></CustomBanner.Description>
+              </CustomBanner>
 
               <FirstButtonBar />
-              <SecondButtonBar />
+              {user && <SecondButtonBar />}
             </View>
           )}
           renderItem={({item, section}) => (
             <Carousal
               // onPress={section.onPress ? section.onPress : () => {}}
               data={item}
-              renderChild={dataitem => (
-                <section.component item={dataitem} onPress={section.onPress} />
-              )}
+              renderChild={dataitem =>
+                section.isLoading ? (
+                  section.loader
+                ) : (
+                  <section.component
+                    item={dataitem}
+                    onPress={section.onPress}
+                  />
+                )
+              }
             />
           )}
         />
@@ -188,7 +247,7 @@ export default MovieScreen;
 
 const styles = (theme: Theme) =>
   StyleSheet.create({
-    container: {margin: 'auto'},
+    container: {padding: 'auto', backgroundColor: theme.colors.background},
     buttons: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -196,58 +255,20 @@ const styles = (theme: Theme) =>
       gap: 5,
       marginVertical: theme.spacing.m,
     },
+    fab: {
+      backgroundColor: '#6200ea', // Adjust this based on your theme
+      width: 60,
+      height: 60,
+      borderRadius: 30, // Circular FAB
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    text: {
+      marginTop: 10, // Space between FAB and text
+      fontSize: 16,
+      color: '#6200ea', // Match FAB background color or change as per theme
+    },
   });
-
-const Buttons = ({theme, navigation, width, width2}: any) => {
-  return (
-    <>
-      <View style={styles(theme).buttons}>
-        <Button
-          color={theme.colors.inactive}
-          title={'Rating'}
-          width={width}
-          onPress={() => navigation.navigate('RatingScreen')}
-        />
-        <Button
-          color={theme.colors.inactive}
-          title={'Guide'}
-          width={width}
-          onPress={() => {}}
-        />
-        <Button
-          color={theme.colors.inactive}
-          title={'Awards'}
-          width={width}
-          onPress={() => {}}
-        />
-        <Button
-          color={theme.colors.inactive}
-          title={'Cast'}
-          width={width}
-          onPress={() => {}}
-        />
-      </View>
-      <View style={styles(theme).buttons}>
-        <Button
-          onPress={() => {}}
-          title={'Wishlist'}
-          width={width2}
-          leftIcon={() => (
-            <Icon name={'add'} type={'MaterialIcons'} size={24} />
-          )}
-        />
-        <Button
-          onPress={() => {}}
-          title={'Set Reminder'}
-          width={width2}
-          leftIcon={() => (
-            <Icon name={'alarm'} type={'MaterialIcons'} size={24} />
-          )}
-        />
-      </View>
-    </>
-  );
-};
 
 // const MovieScreen = () => {
 //   return <></>;

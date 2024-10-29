@@ -26,6 +26,10 @@ export default CastCard;
 const styles = (theme: Theme) =>
   StyleSheet.create({
     container: {},
-    card: {borderRadius: 10},
-    text: {maxWidth: 100},
+    card: {
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.colors.foreground,
+    },
+    text: {maxWidth: 100, color: theme.colors.foreground},
   });

@@ -8,13 +8,16 @@ import AwardScreen from '../screens/AwardScreen/AwardScreen';
 import CastScreen from '../screens/CastScreen/CastScreen';
 import RatingScreen from '../screens/RatingScreen/RatingScreen';
 import GuideScreen from '../screens/GuideScreen/GuideScreen';
+import VideoScreen from '../screens/VideoScreen/VideoScreen';
+import StreamScreen from '../screens/VideoScreen/StreamScreen';
 
 export type MovieStackParamList = {
   MovieScreen: {tmdbId: number};
   RatingScreen: {tmdbId: number};
-  GuideScreen: {tmdbId: number};
+  VideoScreen: {tmdbId: number};
   CastScreen: {tmdbId: number};
   AwardScreen: {tmdbId: number};
+  StreamScreen: {tmdbId: number};
 };
 
 const MovieStack = createStackNavigator<MovieStackParamList>();
@@ -60,10 +63,21 @@ const MovieStackNavigator = ({route}: {route: any}) => {
       <MovieStack.Screen
         options={{
           headerStyle: {backgroundColor: theme.colors.primary},
+          // headerShown: false,
           headerLeft: () => <Icon name="chevron-left" type="MaterialIcons" />,
         }}
-        name="GuideScreen"
-        component={GuideScreen}
+        name="VideoScreen"
+        component={VideoScreen}
+        initialParams={{tmdbId}}
+      />
+      <MovieStack.Screen
+        options={{
+          headerStyle: {backgroundColor: theme.colors.primary},
+          headerShown: false,
+          headerLeft: () => <Icon name="chevron-left" type="MaterialIcons" />,
+        }}
+        name="StreamScreen"
+        component={StreamScreen}
         initialParams={{tmdbId}}
       />
     </MovieStack.Navigator>

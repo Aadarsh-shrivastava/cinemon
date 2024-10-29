@@ -3,59 +3,41 @@ import React, {useContext, useEffect, useRef, useState} from 'react';
 import {Theme, useTheme} from '../../contexts/themeContext';
 import Carousal from 'components/Carousal';
 import VerticalMovieCard from 'components/VerticalMovieCard';
-import {watchlist} from 'data';
 import SectionHeader from 'components/SectionHeader';
 import {useDispatch, useSelector} from 'react-redux';
-import Logger from 'components/Logger';
-import {addToWatchList} from 'redux/watchlistAction';
 import {movie_detail} from 'types';
 import Button from 'components/Button';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import useAuth, {AuthContext} from 'contexts/authContext';
-import auth from '@react-native-firebase/auth';
+import {getWatchList} from '../../firebase/firestore/watchList';
+import firestore from '@react-native-firebase/firestore';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {ProfileStackParamList} from 'navigation/ProfileStack';
+import {useNavigation} from '@react-navigation/native';
+import VerticalMovieCardLoader from 'components/Loaders/VerticalMovieCardLoader';
 
-const url = 'https://api.themoviedb.org/3/authentication/token/new';
-const options = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    Authorization:
-      'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2YmVjNmRjMmQ4OWZkYTU2ZGVmMmFlNWIyOGVhZDExOCIsIm5iZiI6MTcyNzg5OTQxNy4wOTQ5MTMsInN1YiI6IjY2ZTdlMTk2ZGQyMjRkMWEzOTkxYmZjMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Jyme0XEPuZRzzBrUpiTdgj1QhwoN7OPYDbp0PuBDhqI',
-  },
-};
+type ProfileScreenNavigationProps = StackNavigationProp<
+  ProfileStackParamList,
+  'ProfileScreen'
+>;
 const TaskScreen = () => {
   const {theme, toggleTheme} = useTheme();
-  const movies: movie_detail = useSelector((state: any) => state.watchlist);
-  const authContext = useContext(AuthContext);
+  const [watchList, setWatchList] = useState<movie_detail[]>([]);
+  const navigation = useNavigation<ProfileScreenNavigationProps>();
 
+  const authContext = useContext(AuthContext);
   if (!authContext) {
     throw new Error('AuthContext must be used within an AuthProvider');
   }
 
-  const {user} = authContext;
+  const {user, signOut} = authContext;
 
-  const signOut = () => {
-    auth().signOut();
-  };
-  const handleSignIn = async () => {
-    auth()
-      .signInAnonymously()
-      .then(() => {
-        console.log('User signed in anonymously');
-      })
-      .catch(error => {
-        if (error.code === 'auth/operation-not-allowed') {
-          console.log('Enable anonymous in your firebase console.');
-        }
-
-        console.error(error);
-      });
-  };
+  getWatchList(user?.uid ?? '')
+    .then(d => setWatchList(d))
+    .catch(e => console.log(e));
 
   return (
     <View style={styles(theme).container}>
-      {user && <Logger item={user} />}
+      {/* {user && <Logger item={user} />} */}
       <View
         style={{
           flexDirection: 'row',
@@ -65,21 +47,23 @@ const TaskScreen = () => {
         <Image
           style={styles(theme).profile}
           source={{
-            uri: `https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500`,
+            uri:
+              user?.photoURL ??
+              `https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500`,
           }}
           height={100}
           width={100}
         />
         <View
           style={{alignItems: 'flex-start', justifyContent: 'space-between'}}>
-          <Text>Aadarsh Shrivastava</Text>
-          <Text>Aadarshkhurai@gmail.com</Text>
-          <Button
+          <Text style={styles(theme).text}>{user?.displayName}</Text>
+          <Text style={styles(theme).text}>{user?.email}</Text>
+          {/* <Button
             title={'Edit Profile'}
             onPress={function (): void {
               throw new Error('Function not implemented.');
             }}
-          />
+          /> */}
         </View>
       </View>
       <SectionHeader
@@ -88,11 +72,20 @@ const TaskScreen = () => {
         onPress={() => {}}
       />
       <Carousal
-        renderChild={item => <VerticalMovieCard item={item} />}
-        data={movies}
+        renderChild={(item: movie_detail) => (
+          <VerticalMovieCard
+            item={item}
+            onPress={(id: number) =>
+              navigation.push('MovieStack', {tmdbId: id})
+            }
+          />
+        )}
+        data={watchList}
       />
-      <Button title="Sign In" onPress={handleSignIn} />
-      <Button title="Sign Out" onPress={handleSignIn} />
+      <View style={styles(theme).buttons}>
+        <Button title="Sign Out" onPress={signOut} width={'90%'} />
+      </View>
+      {/* <VerticalMovieCardLoader /> */}
     </View>
   );
 };
@@ -103,4 +96,9 @@ const styles = (theme: Theme) =>
   StyleSheet.create({
     container: {margin: theme.spacing.s},
     profile: {margin: theme.spacing.m, borderRadius: theme.spacing.m},
+    buttons: {
+      alignItems: 'center',
+      gap: theme.spacing.ml,
+    },
+    text: {color: theme.colors.foreground},
   });

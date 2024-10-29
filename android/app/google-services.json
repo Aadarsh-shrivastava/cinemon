@@ -12,7 +12,20 @@
           "package_name": "com.cinemon"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "239073733004-oduos04pmi6efvaan7incgse55f37kv8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cinemon",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "239073733004-uvl6vhq5bg58h07ihkt8tjb24fs98g9c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBz-ZU37ttP79iaH0OwQYZF7I-EoGOA3Rk"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "239073733004-uvl6vhq5bg58h07ihkt8tjb24fs98g9c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

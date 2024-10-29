@@ -1,10 +1,15 @@
+import {StyleSheet, Text, View} from 'react-native';
 import React, {useReducer} from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
-import {Skeleton} from 'moti/skeleton';
-import {MotiView} from 'moti';
 import {Theme, useTheme} from 'contexts/themeContext';
+import {MotiView} from 'moti';
+import {Skeleton} from 'moti/skeleton';
 
-const VerticalMovieCardLoader = () => {
+interface CustomLoaderProps {
+  height: number;
+  width: number;
+  radius: number;
+}
+const CustomLoader = ({height, width, radius}: CustomLoaderProps) => {
   const [dark, toggle] = useReducer(s => !s, false);
   const {theme, toggleTheme} = useTheme();
   const colorMode = dark ? 'dark' : 'light';
@@ -15,18 +20,19 @@ const VerticalMovieCardLoader = () => {
           type: 'timing',
         }}
         style={[styles(theme).container, styles(theme).BackgroundImage]}
-        animate={{backgroundColor: dark ? '#000000' : 'transparent'}}>
+        animate={{backgroundColor: theme.colors.foreground}}>
         <Skeleton
           colorMode={colorMode}
-          radius={25}
-          height={theme.size.m * 12}
-          width={theme.size.m * 9}
+          radius={radius}
+          height={theme.size.m * height}
+          width={theme.size.m * width}
         />
         <Spacer />
       </MotiView>
     </>
   );
 };
+
 const Spacer = ({height = 16}) => <View style={{height}} />;
 
 const styles = (theme: Theme, width: number = 9, height: number = 12) =>
@@ -58,4 +64,4 @@ const styles = (theme: Theme, width: number = 9, height: number = 12) =>
     },
   });
 
-export default VerticalMovieCardLoader;
+export default CustomLoader;

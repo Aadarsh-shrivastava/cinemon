@@ -3,14 +3,15 @@ import MovieScreen from '../screens/MovieScreen/MovieScreen';
 import ProfileScreen from '../screens/ProfileScreen/ProfileScreen';
 import Header from 'components/Header';
 import Icon from '../Icon';
-import {theme} from '../theme';
 import BrowserScreen from '../screens/BrowserScreen/BrowserScreen';
 import MovieStackNavigator from './MovieStackNavigator';
 import SearchScreen from '../screens/BrowserScreen/SearchScreen';
+import FilterScreen from '../screens/BrowserScreen/FilterScreen';
+import {useTheme} from 'contexts/themeContext';
 
 export type BrowserStackParamList = {
   BrowserScren: undefined;
-  FilterScreen: undefined;
+  FilterScreen: {checked: string; setChecked: (s: string) => void};
   MovieStack: {tmdbId: number};
   SearchScreen: undefined;
 };
@@ -18,6 +19,7 @@ export type BrowserStackParamList = {
 const BrowserStack = createStackNavigator<BrowserStackParamList>();
 
 const BrowserStackNavigator = () => {
+  const {theme, toggleTheme} = useTheme();
   return (
     <BrowserStack.Navigator>
       <BrowserStack.Screen
@@ -26,9 +28,19 @@ const BrowserStackNavigator = () => {
         component={BrowserScreen}
       />
       <BrowserStack.Screen
-        options={{headerShown: false}}
+        options={{
+          headerStyle: {backgroundColor: theme.colors.primary},
+          headerLeft: () => (
+            <Icon
+              name="chevron-left"
+              type="MaterialIcons"
+              color={theme.colors.background}
+            />
+          ),
+        }}
         name="FilterScreen"
-        component={BrowserScreen}
+        component={FilterScreen}
+        initialParams={{checked: 'None', setChecked: () => {}}}
       />
       <BrowserStack.Screen
         options={{headerShown: false}}

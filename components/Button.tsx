@@ -1,15 +1,25 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import React from 'react';
 import {Theme, useTheme} from 'contexts/themeContext';
 import Icon from '../Icon';
 
 interface ButtonProps {
   title: string;
-  width?: number;
+  width?: number | string;
   color?: string;
   onPress: () => void;
   leftIcon?: () => React.ReactNode;
   rightIcon?: () => React.ReactNode;
+  textStyle?: TextStyle;
+  barStyle?: ViewStyle;
 }
 const Button = ({
   title,
@@ -18,15 +28,17 @@ const Button = ({
   color,
   leftIcon,
   rightIcon,
+  barStyle,
+  textStyle,
 }: ButtonProps) => {
   const {theme, toggleTheme} = useTheme();
   return (
-    <View style={styles(theme).container}>
+    <View style={[styles(theme).container, barStyle]}>
       <TouchableOpacity
         style={styles(theme, width, color).button}
         onPress={onPress}>
         <View style={styles(theme).lefIcon}>{leftIcon && leftIcon()}</View>
-        <Text style={styles(theme).title}>{title}</Text>
+        <Text style={[styles(theme).title, textStyle]}>{title}</Text>
         <View style={styles(theme).lefIcon}>{rightIcon && rightIcon()}</View>
       </TouchableOpacity>
     </View>

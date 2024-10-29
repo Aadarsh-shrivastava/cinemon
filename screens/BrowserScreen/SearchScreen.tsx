@@ -6,13 +6,19 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import useApi from 'hooks/useApi';
 import Logger from 'components/Logger';
 import VerticalMovieCard from 'components/VerticalMovieCard';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {MovieStackParamList} from 'navigation/MovieStackNavigator';
+import {useNavigation} from '@react-navigation/native';
+import {BrowserStackParamList} from 'navigation/BrowserStack';
 
+type VerticalMovieCardNavigarionProp =
+  StackNavigationProp<BrowserStackParamList>;
 interface SearchScreenProps {}
 const SearchScreen = ({}: SearchScreenProps) => {
   const {theme, toggleTheme} = useTheme();
   const [query, setQuery] = useState<string>('');
   const searchBar = useRef<SearchBarHandle>(null);
-
+  const navigation = useNavigation<VerticalMovieCardNavigarionProp>();
   const {data, isLoading} = useApi(
     `/3/search/movie?query=${query}`,
     'GET',
@@ -41,7 +47,9 @@ const SearchScreen = ({}: SearchScreenProps) => {
               width={12}
               height={16}
               item={item}
-              onPress={(id: number) => {}}
+              onPress={(id: number) => {
+                navigation.push('MovieStack', {tmdbId: id});
+              }}
             />
           </View>
         )}
@@ -60,5 +68,8 @@ export default SearchScreen;
 
 const styles = (theme: Theme) =>
   StyleSheet.create({
-    container: {margin: theme.spacing.s},
+    container: {
+      padding: theme.spacing.s,
+      backgroundColor: theme.colors.background,
+    },
   });

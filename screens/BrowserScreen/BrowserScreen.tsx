@@ -5,8 +5,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
-import React, {Suspense} from 'react';
+import React, {Suspense, useState} from 'react';
 import {Theme, useTheme} from '../../contexts/themeContext';
 import SearchBar from './components/SearchBar';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -19,10 +20,13 @@ import useApi from '../../hooks/useApi';
 import Logger from 'components/Logger';
 import useInfiniteApi from '../../hooks/useInfiniteApi';
 import FilterBar from 'components/FilterBar';
+import Icon from '../../Icon';
 
 type BrowserScreenProps = StackScreenProps<BrowserStackParamList, 'MovieStack'>;
 const TaskScreen = ({navigation}: BrowserScreenProps) => {
   const {theme, toggleTheme} = useTheme();
+  const [sortBy, setSortBy] = useState<string>('popularity');
+  const {width, height} = useWindowDimensions();
 
   const {
     data: filters,
@@ -38,13 +42,16 @@ const TaskScreen = ({navigation}: BrowserScreenProps) => {
   );
 
   const {data, fetchNextPage} = useInfiniteApi(
-    '/3/discover/movie' +
+    '3/discover/movie' +
       (chipData && chipData.length > 0 && chipData.some(item => item.isSelected)
         ? '?with_genres=28,' +
           chipData
-            .filter(item => item.isSelected) // Only keep selected items
-            .map(item => item.id) // Extract the IDs
-            .join(',') // Join IDs with commas
+            .filter(item => item.isSelected)
+            .map(item => item.id)
+            .join(',') +
+          (sortBy != 'None' ? `&sort_by=${sortBy}.desc` : '')
+        : sortBy != 'None'
+        ? `?sort_by=${sortBy}.desc`
         : ''),
     'GET',
     'popular_movies',
@@ -52,11 +59,30 @@ const TaskScreen = ({navigation}: BrowserScreenProps) => {
 
   return (
     <SafeAreaView style={styles(theme).container}>
-      <Pressable onPress={() => navigation.push('SearchScreen')}>
-        <SearchBar isReadOnly />
-      </Pressable>
+      <Text style={{color: 'red'}}>{sortBy}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <Pressable
+          onPress={() => navigation.push('SearchScreen')}
+          style={{flexGrow: 1}}>
+          <SearchBar isReadOnly />
+        </Pressable>
+        <Icon
+          name={'filter-list'}
+          type={'MaterialIcons'}
+          onPress={() =>
+            navigation.navigate('FilterScreen', {
+              checked: sortBy,
+              setChecked: setSortBy,
+            })
+          }
+        />
+      </View>
       {!isLoadingFilters && <FilterBarComponent />}
-      {/* <Logger item={chipData} /> */}
       <FlatList
         numColumns={2}
         data={data ? data.pages.flatMap(page => page.results) : []}
@@ -72,7 +98,7 @@ const TaskScreen = ({navigation}: BrowserScreenProps) => {
             />
           </View>
         )}
-        keyExtractor={(item, index) => item.id.toString() + index.toString()}
+        keyExtractor={(item, index) => index.toString()}
         columnWrapperStyle={{gap: theme.spacing.s}}
         onEndReached={() => fetchNextPage()}
         onEndReachedThreshold={2}
@@ -89,5 +115,8 @@ export default TaskScreen;
 
 const styles = (theme: Theme) =>
   StyleSheet.create({
-    container: {margin: theme.spacing.s},
+    container: {
+      padding: theme.spacing.s,
+      backgroundColor: theme.colors.background,
+    },
   });

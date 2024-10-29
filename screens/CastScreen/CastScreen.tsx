@@ -40,5 +40,5 @@ export default CastScreen;
 
 const styles = (theme: Theme) =>
   StyleSheet.create({
-    container: {},
+    container: {padding: 10, backgroundColor: theme.colors.background},
   });
